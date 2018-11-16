@@ -1,0 +1,18 @@
+{
+  "name": "testapi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "docs": "apidoc -i ./routes/ -o ./docs/ -t ./node_modules/wood-node/template/",
+    "start": "node ./main.js",
+    "cluster": "node ./maincluster.js",
+    "dev": "nodemon --inspect=9230 ./main.js"
+  },
+  "author": "yuronghui",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "^3.5.3",
+    "mongodb": "^3.1.9"
+  }
+}
