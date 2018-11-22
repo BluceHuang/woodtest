@@ -58,12 +58,12 @@ exports.util = {
  */
 exports.query = {
   package: 'wood-query',
-  enable: true
+  enable: false
 }
 
 exports.query = {
   package: 'wood-querysql',
-  enable: false
+  enable: true
 }
 /**
  * redis
@@ -84,10 +84,10 @@ exports.redis = {
  */
 exports.mysql = {
   package: 'wood-mysql',
-  enable: false,
+  enable: true,
   config: {
     master: {
-      host: '127.0.0.1',
+      host: '10.0.1.26',
       user: 'root',
       password: 'A123456a&'
     }
@@ -96,28 +96,28 @@ exports.mysql = {
 /**
  * mongo
  */
-exports.mongo = {
-  package: 'wood-mongo',
-  enable: true
-}
-exports.mongoconnect = {
-  package: 'wood-mongo/connect',
-  enable: true,
-  config: {
-    // master: 'mongodb://127.0.0.1:27017/test',
-    master: 'mongodb://10.0.1.26:51801,10.0.1.26:51802,10.0.1.26:51803,10.0.1.26:51804/test?replicaSet=rs0&readPreference=secondaryPreferred',
-    // master: {
-    //   dbName: 'test',
-    //   host: ['10.0.1.26:51801','10.0.1.26:51802','10.0.1.26:51803','10.0.1.26:51804'],
-    //   port: '',
-    //   user: '',
-    //   password: '',
-    //   replset: 'rs0',
-    //   readPreference: 'secondaryPreferred'
-    // },
-    slave1: 'mongodb://127.0.0.1:27017/test',
-  }
-}
+// exports.mongo = {
+//   package: 'wood-mongo',
+//   enable: false
+// }
+// exports.mongoconnect = {
+//   package: 'wood-mongo/connect',
+//   enable: false,
+//   config: {
+//     // master: 'mongodb://127.0.0.1:27017/test',
+//     master: 'mongodb://10.0.1.26:51801,10.0.1.26:51802,10.0.1.26:51803,10.0.1.26:51804/test?replicaSet=rs0&readPreference=secondaryPreferred',
+//     // master: {
+//     //   dbName: 'test',
+//     //   host: ['10.0.1.26:51801','10.0.1.26:51802','10.0.1.26:51803','10.0.1.26:51804'],
+//     //   port: '',
+//     //   user: '',
+//     //   password: '',
+//     //   replset: 'rs0',
+//     //   readPreference: 'secondaryPreferred'
+//     // },
+//     slave1: 'mongodb://127.0.0.1:27017/test',
+//   }
+// }
 /**
  * 跨域处理
  */
@@ -165,14 +165,14 @@ exports.fields = {
 /**
  * 数据模型
  */
-exports.model = {
-  package: 'wood-model',
-  enable: true
-}
+// exports.model = {
+//   package: 'wood-model',
+//   enable: false
+// }
 
-exports.modelsql = {
+exports.model = {
   package: 'wood-model-sql',
-  enable: false
+  enable: true
 }
 /**
  * 控制器

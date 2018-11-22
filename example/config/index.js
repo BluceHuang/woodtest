@@ -10,7 +10,7 @@ module.exports = {
   isDebug: true, //是否开启调试模式
 	errorCode: {}, //错误码
 	plugins,
-	defaultDB: 'mongodb',
+	defaultDB: 'mysql', //mongodb
   cluster: {
     cpus: 1
   }
