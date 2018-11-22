@@ -6,13 +6,32 @@
   "scripts": {
     "docs": "apidoc -i ./routes/ -o ./docs/ -t ./node_modules/wood-node/template/",
     "start": "node ./main.js",
-    "cluster": "node ./maincluster.js",
-    "dev": "nodemon --inspect=9230 ./main.js"
+    "dev": "cross-env NODE_ENV=development nodemon --inspect=9230 ./main.js"
   },
   "author": "yuronghui",
   "license": "ISC",
   "dependencies": {
-    "bluebird": "^3.5.3",
-    "mongodb": "^3.1.9"
+    "compression": "^1.7.3",
+    "mongo-sql": "^6.2.0",
+    "wood-apidocs": "^1.0.6",
+    "wood-controller": "^1.0.8",
+    "wood-crossdomain": "^1.0.3",
+    "wood-fields": "^1.0.2",
+    "wood-httpserver": "^1.0.7",
+    "wood-model": "^1.0.15",
+    "wood-module-loader": "^1.0.6",
+    "wood-mongo": "^1.0.14",
+    "wood-query": "^1.0.11",
+    "wood-queue": "^1.0.2",
+    "wood-redis": "^1.0.5",
+    "wood-requestbody": "^1.0.1",
+    "wood-responseformat": "^1.0.2",
+    "wood-router": "^1.0.16",
+    "wood-tcp": "^1.0.1",
+    "wood-token": "^1.0.2",
+    "wood-util": "^1.0.7"
+  },
+  "devDependencies": {
+    "cross-env": "^5.2.0"
   }
 }

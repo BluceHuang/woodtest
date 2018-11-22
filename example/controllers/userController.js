@@ -3,7 +3,6 @@ const {
   Model,
   error,
   catchErr,
-  Mongo,
   Query,
   Util
 } = require('../../index');
@@ -13,14 +12,11 @@ class UserController extends controller {
   // 添加用户
   async add(req, res, next) {
     let params = Util.getParams(req);
-    params.data.rowid = params.data.uid;
-    delete params.data.uid;
-    if (!params.data.rowid) {
+    if (!params.data.uid) {
       res.print('uid不能为空');
       return;
     }
-    let query = Query().where({ rowid: params.data.rowid });
-    const hasOne = await catchErr(Model('users').findOne(query));
+    const hasOne = await catchErr(Model('users').findOne({ uid: params.data.uid }));
     if (hasOne.err) {
       res.print(hasOne);
     } else {

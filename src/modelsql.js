@@ -6,74 +6,181 @@ const Util = require('./util');
 const cluster = require('cluster');
 const {
   error,
-  catchErr,
-  isEmpty,
-  getListKey
+  catchErr
 } = Util;
 let largelimit = 20000; //限制不能超过2万条数据返回
 
 class Model {
   constructor(data, opts = {}) {
-    this.tableName = opts.tableName || '';
-    this.fields = opts.fields || {};
-    this.select = opts.select || {};
-    this.relation = {};
+    this.fieldMap = {};
+    this._options = {
+      tableName: '', //集合名
+      fields: {}, //集合字段
+      select: [], //只返回的字段
+      database: Object.keys(WOOD.config.mysql)[0],
+      ...opts
+    };
+    if (!this._options.tableName) console.error('表名不能为空');
+    this.redis = new Redis.client(this._options.tableName);
+    this.db = new Mysql(this._options);
+    this.SQL = this.db.query();
+    this._initFields();
+    if (data) this.setData(data);
+
+    this.db.createTable();
+    return Object.create(this, this._get_set());
   }
 
   // 设置getter和setter
   _get_set() {
-    let obj = {}, fieldMap = this.fields.fieldMap;
-    for (let key in fieldMap) {
+    let obj = {};
+    for (let key in this.fieldMap) {
       obj[key] = {
         get() {
-          if (CONFIG.isDebug) console.warn(`getter: ${key}`);
-          return fieldMap[key].value || fieldMap[key].defaultValue;
+          if (WOOD.config.isDebug) console.warn(`getter: ${key}`);
+          return this.fieldMap[key].value || this.fieldMap[key].defaultValue;
         },
         set(val) {
-          if (CONFIG.isDebug) console.warn(`setter: ${key}, ${val}`);
-          fieldMap[key].value = val;
+          if (WOOD.config.isDebug) console.warn(`setter: ${key}, ${val}`);
+          this.fieldMap[key].value = val;
         }
       }
     }
     return obj;
   }
 
-  _init() {
-    let fields = this.fields.data || {};
+  // 初始化字段
+  _initFields() {
+    let fields = this._options.fields;
     for (let key in fields) {
-      let item = fields[key];
-      if (key == '_id') continue;
-      // 建索引
-      if (item.index) {
-        if(cluster.worker == null || CONFIG.service.initloop.workerid == cluster.worker.id){
-          let indexField = {};
-          indexField[key] = item.index == 'text' ? item.index : 1 ;
-          this.db.index(indexField);
-        }
-      }
-      //表关联
-      if (item.key && item.as && item.from) {
-        if (item) {
-          this.relation[key] = item;
-        }
-      }
+      let field = fields[key];
+      if (field == undefined || key === 'id') continue;
+      fields[key] = this._defaultValue(field);;
+      this.fieldMap[key] = fields[key];
     }
-    return Object.create(this, this._get_set());
+  }
+
+  //默认值
+  _defaultValue(value = {}) {
+    let defaultValue = '';
+    if (typeof value == 'object' && !Array.isArray(value)) {
+      defaultValue = value.default;
+    }
+    switch (value.type) {
+      case 'int':
+        value.default = defaultValue || (value.required ? NaN : 0);
+        break;
+      case 'boolean':
+        value.default = defaultValue || false;
+        break;
+      case 'datetime':
+        value.default = defaultValue || Util.moment().format('YYYY-MM-DD HH:mm:ss');
+        break;
+      default:
+        value.default = defaultValue || '';
+        break;
+    }
+    return value;
+  }
+
+  parseParams(body = {}){
+    let result = {};
+    if(body.data){
+      const { order, page = 1, limit = 20, largepage = 1, ...where } = body.data;
+      result = { order, page, limit, largepage, where };
+    }
+    return result;
   }
 
   // 设置数据
   setData(target, value) {
-    this.fields.setData(target, value);
+    let fields = this._options.fields;
+    if (target !== undefined && value !== undefined) {
+      if (typeof target == 'string') {
+        if (!fields[target]) return;
+        fields[target].value = value;
+      } else {
+        target.value = value;
+      }
+    } else if (typeof target == 'object' && !Array.isArray(target) && value == undefined) {
+      if (!Util.isEmpty(target)) {
+        for (let key in fields) {
+          let value = target[key];
+          if (value == undefined) continue;
+          fields[key].value = value;
+        }
+      }
+    }
   }
 
   // 获取模型数据
   getData(hasVirtualField = true) {
-    return this.fields.getData(hasVirtualField);
+    let fields = this._options.fields, parentData = {};
+    if (!Util.isEmpty(fields)) {
+      for (let key in fields) {
+        let field = fields[key];
+        if (!hasVirtualField && field.type == 'virtual') continue;
+        if (typeof field == 'object' && !Array.isArray(field)) {
+          let theVal = field.value !== undefined ? field.value : field.default;
+          if(field.type == 'datetime') theVal = theVal.replace(/'/g, '');
+          if(theVal !== undefined) parentData[key] = theVal;
+        } else if (typeof field !== 'function') {
+          if(field !== undefined) parentData[key] = field;
+        }
+      }
+    }
+    return parentData;
   }
 
-  // 重置数据
-  resetData() {
-    this.fields.resetData();
+  _validateError(key, field) {
+    let err = null,
+      errObj = Util.deepCopy(WOOD.error_code.error_validation);
+    if (typeof field == 'object') {
+      let value = field.value !== undefined ? field.value : field.default;
+      // 验证是否空值
+      if (field.notNull) {
+        let isOk = true;
+        if (value == undefined) isOk = false;
+        if (typeof value == 'string' && value == '') isOk = false;
+        if (!isOk) {
+          err = errObj;
+          err.msg += `, [${key}]不能为空`;
+          return err;
+        }
+      }
+      // 检验最大字符长度
+      if(field.maxLength){
+        if(JSON.stringify(value).length > field.maxLength){
+          err = errObj;
+          err.msg += `, [${key}]值长度超过最大允许值${field.maxLength}`;
+          return err;
+        }
+      }
+      //自定义验证  param: value
+      if (field.validator) {
+        if (typeof field.validator == 'function') {
+          let hasErr = field.validator(value);
+          if (hasErr) {
+            err = hasErr.error || errObj;
+            return err;
+          }
+        }
+      }
+    }
+    return err;
+  }
+
+  // 验证字段
+  validate() {
+    let fields = this._options.fields;
+    let hasErr = false;
+    for (let key in fields) {
+      if(key === 'id') continue;
+      let field = fields[key];
+      hasErr = this._validateError(key, field);
+      if (hasErr) break;
+    }
+    return hasErr;
   }
 
   // 是否新的
@@ -82,32 +189,31 @@ class Model {
   }
 
   //新增数据
-  async create(data, addLock = true, hascheck = true, timeout = 1) {
+  async create(data, times) {
     if (!data) throw error('create方法的参数data不能为空');
-    if (CONFIG.isDebug) console.warn('新增记录');
+    if (WOOD.config.isDebug) console.warn('新增记录');
     let hasId = false;
     if(Array.isArray(data)){
       hasId = !!data.find(item => item.id);
     }else{
       hasId = !!data.id;
     }
-    if (!hasId) {    
+    if (!hasId) {
+      let err = this.validate();
+      if (err) throw error(err);
+      const lock = await catchErr(this.redis.lock());
+      if (lock.data) {
         data = Array.isArray(data) ? data : [data];
-        let newData = [];        
+        let newData = [];
+        let defaultValue = this.getData();
         data.forEach(item => {
-          this.setData(item);
-          let err = hascheck ? this.fields.validate() : false;
-          if (err) throw error(err);
-          newData.push(this.getData());
+          newData.push(Object.assign(JSON.parse(JSON.stringify(defaultValue)), item));
         });
-
-        const lock = addLock ? await catchErr(this.redis.lock(timeout)) : {data: 1};
-        if (lock.data) {     
-          const result = await catchErr(this.db.insert(newData));
-          if(addLock) this.redis.unlock(lock.data);
-          if (result.data){
-            return result.data;
-          }else{
+        let sql = this.SQL.insert(newData);
+        const result = await catchErr(this.db.execute(sql));
+        if (result.data){
+          return result.data;
+        }else{
           throw error(result.err);
         }
       }else{
@@ -119,20 +225,19 @@ class Model {
   }
 
   // 更新数据
-  async update(data = {}, addLock = true, hascheck = true) {
+  async update(data, required = false) {
     if (!data) throw error('update方法的参数data不能为空');
-    if(!isEmpty(data)) this.setData(data);
     if (!this.isNew() || data.id) {
-      let err = hascheck ? this.fields.validate() : false,
+      let err = this.validate(),
         id = this.id || data.id;
+      if (!required) err = false;
       if (err) {
         throw error(err);
       } else {
-        let lock = addLock ? await catchErr(this.redis.lock()) : {data: 1};
-        if (lock.data) {
-          delete data.id;
-          const result = await catchErr(this.db.update({where:id, data}));
-          if(addLock) this.redis.unlock(lock.data);
+        let isLock = await catchErr(this.redis.lock());
+        if (isLock.data) {
+          let sql = this.SQL.where({ id }).update(data);
+          const result = await catchErr(this.db.execute(sql));
           if (result.data){
             return result.data;
           }else{
@@ -149,13 +254,13 @@ class Model {
   // 保存数据
   async save() {
     let data = this.getData(false);
-    if (isEmpty(data) || !data) throw error('save方法的data为空');
+    if (Util.isEmpty(data) || !data) throw error('save方法的data为空');
     if (!this.isNew() || data.id) {
-      const updateOk = await catchErr(this.update({}));
+      const updateOk = await catchErr(this.update(data));
       if (updateOk.err) throw error(updateOk.err);
       return updateOk.data;
     } else {
-      const result = await catchErr(this.create({}));
+      const result = await catchErr(this.create(data));
       if (result.err) throw error(result.err);
       return result.data;
     }
@@ -166,11 +271,8 @@ class Model {
     if (!data) return false;
     const lock = await catchErr(this.redis.lock());
     if (lock.data) {
-      let result = await this.db.delete(data);
-      this.redis.unlock();
-      if (result.err) {
-        throw error(result.err);
-      }
+      let sql = this.SQL.delete(data);
+      return await this.db.execute(sql);
     }else{
       throw error(lock.err);
     }
@@ -201,11 +303,11 @@ class Model {
         hasKey = false;
       }
       if (hasKey && !noCatch) {
-        if (CONFIG.isDebug) console.warn('已有count');
+        if (WOOD.config.isDebug) console.warn('已有count');
         let arr = await this.redis.listSlice(theKey, 0, 1);
         if (arr.length) count = arr[0];
       } else {
-        if (CONFIG.isDebug) console.warn('没有count');
+        if (WOOD.config.isDebug) console.warn('没有count');
         if (query.hasKey && !noCatch) {
           count = await this.redis.listCount(query.listKey);
         } else {
@@ -302,7 +404,7 @@ class Model {
         const result = await catchErr(this.getQuery(body, noCatch));
         if (result.data) {
           let query = result.data.select(!Util.isEmpty(this._options.select) ? this._options.select : []);
-          if (CONFIG.isDebug) console.warn(`请求列表, ${query.hasKey ? '有' : '无'}listKey`);
+          if (WOOD.config.isDebug) console.warn(`请求列表, ${query.hasKey ? '有' : '无'}listKey`);
           const docsResult = await catchErr(this.db.execute(query));
           if (docsResult.data) {
             let docs = docsResult.data;

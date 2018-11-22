@@ -1,47 +1,38 @@
 // 关联型查询对象类
-// 将json格式查询转化为sql语句，json格式需要参考mongo-sql
 // by YuRonghui 2018-7-10
 const mongoSQL = require('mongo-sql');
-const { isEmpty } = require('./util');
+const Util = require('./util');
+// const mongoToSQL = require('mongo-to-sql');
 
 class Query {
-  constructor(params = {}) {
+  constructor(tableName = '') {
     this._isQuery = true;
     this.sql = {
       type: 'select',
-      table: '',
+      table: tableName
     };
-
-    for (item in params) {
-      if (typeof this[item] === 'function') {
-        this[item](params[item]);
-      }
-    }
   }
-
-  create(params={}){
-    let {tableName, definition, ifNotExists = true} = params;
+  create(tableName, definition, ifNotExists = true){
     this.sql.type = 'create-table';
     if(tableName) this.sql.table = tableName;
     this.sql.ifNotExists = ifNotExists;
     if(definition) this.sql.definition = definition;
     return this;
   }
-  drop(params={}){
-    let {tableName, cascade = true, ifExists = true} = params;
+  drop(tableName, cascade = true, ifExists = true){
     this.sql.type = 'drop-table';
     if(tableName) this.sql.table = tableName;
     this.sql.cascade = cascade;
     this.sql.ifExists = ifExists;
     return this;
   }
-  table(params='tablename'){
+  table(params){
     if(params) this.sql.table = params;
     return this;
   }
   index(name, params = {}){
     this.sql.type = 'create-index';
-    if(!isEmpty(params) && name) {
+    if(!Util.isEmpty(params) && name) {
       this.sql = {
         ...this.sql,
         name,
@@ -53,8 +44,7 @@ class Query {
     }
     return this;
   }
-  view(params = {}){
-    let {name, orReplace = true, expression = {}} = params;
+  view(name, orReplace = true, expression = {}){
     let newData = {...this.sql};
     this.sql = {
       ...newData,
@@ -66,12 +56,12 @@ class Query {
     return this;
   }
   definition(columns = {}){
-    if(!isEmpty(columns)) this.sql.definition = Object.assign(this.sql.definition || {}, columns);
+    if(!Util.isEmpty(columns)) this.sql.definition = Object.assign(this.sql.definition || {}, columns);
     return this;
   }
   alter(action = {}){
     this.sql.type = 'alter-table';
-    if(!isEmpty(action)) this.sql.action = action;
+    if(!Util.isEmpty(action)) this.sql.action = action;
     return this;
   }
   alias(val){
@@ -79,12 +69,12 @@ class Query {
     return this;
   }
   expression(params = {}){
-    if(!isEmpty(params)) this.sql.expression = Object.assign(this.sql.expression || {}, params);
+    if(!Util.isEmpty(params)) this.sql.expression = Object.assign(this.sql.expression || {}, params);
     return this;
   }
   select(params = []) {
     this.sql.type = 'select';
-    if(!isEmpty(params)) this.sql.columns = params;
+    if(!Util.isEmpty(params)) this.sql.columns = params;
     return this;
   }
   insert(params){
@@ -93,7 +83,7 @@ class Query {
     return this;
   }
   values(params){
-    if(!isEmpty(params)) {
+    if(!Util.isEmpty(params)) {
       if(Array.isArray(params)){
         this.sql.values = params;
       }else{
@@ -104,43 +94,39 @@ class Query {
   }
   update(params = {}) {
     this.sql.type = 'update';
-    if(!isEmpty(params)) this.sql.updates = Object.assign(this.sql.updates || {}, params);
+    if(!Util.isEmpty(params)) this.sql.updates = Object.assign(this.sql.updates || {}, params);
     return this;
   }
   delete(params = {}) {
     this.sql.type = 'delete';
-    //if(!isEmpty(params)) this.sql.deletes = Object.assign(this.sql.deletes || {}, params);
+    if(!Util.isEmpty(params)) this.sql.deletes = Object.assign(this.sql.deletes || {}, params);
     return this;
   }
-  from(tableName=''){
+  from(tableName){
     if(tableName) this.sql.from = tableName;
     return this;
   }
   join(params = []){
-    if(!isEmpty(params)) this.sql.joins = params;
+    if(!Util.isEmpty(params)) this.sql.joins = params;
     return this;
   }
   withs(params = {}){
-    if(!isEmpty(params)) this.sql.withs = Object.assign(this.sql.withs || {}, params);
+    if(!Util.isEmpty(params)) this.sql.withs = Object.assign(this.sql.withs || {}, params);
     return this;
   }
   where(params = {}) {
-    if(!isEmpty(params)) this.sql.where = Object.assign(this.sql.where || {}, params);
-    return this;
-  }
-  columns(params = []) {
-    if(!isEmpty(params)) this.sql.columns = Object.assign(this.sql.columns || {}, params);
+    if(!Util.isEmpty(params)) this.sql.where = Object.assign(this.sql.where || {}, params);
     return this;
   }
   groupBy(params = []) {
-    if(!isEmpty(params)) this.sql.groupBy = params;
+    if(!Util.isEmpty(params)) this.sql.groupBy = params;
     return this;
   }
-  order(params=[]) {
+  order(params) {
     this.sql.order = params ? params : ['id desc'];
     return this;
   }
-  limit(val=1) {
+  limit(val) {
     if(val) this.sql.limit = val;
     return this;
   }
@@ -150,10 +136,6 @@ class Query {
       str = result.toString();
     str = str.replace(/(\$\d+)/g, '?').replace(/"/g, "`").replace('insert', 'replace');
     return [str, result.values];
-  }
-
-  static getQuery(req = {}) {
-    return new Query(req);
   }
 }
 

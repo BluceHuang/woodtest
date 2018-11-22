@@ -2,7 +2,7 @@
 const {Model, Fields, error} = require('../../index');
 
 let UserModel = Model('master.users', new Fields({
-  "rowid": {
+  "uid": {
     type: 'Number',
     required: true,
     index: true
