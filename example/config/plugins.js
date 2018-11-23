@@ -85,10 +85,16 @@ exports.mysqlconnect = {
   enable: true,
   config: {
     test: {
+      database: 'test',
       host: '10.0.1.26',
       port: '3306',
       user: 'hy',
-      password: 'HYtest123@'
+      password: 'HYtest123@',
+      pool: {
+        max: 5,
+        min: 0,
+        idle: 1000
+      }
     }
   }
 }
