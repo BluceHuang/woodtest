@@ -5,7 +5,7 @@ const {
   error
 } = require('../../index');
 
-module.exports = Model('master.tests', new Fields({
+module.exports = Model('test.test', new Fields({
     "rowid": {
       type: 'Number',
       required: true,

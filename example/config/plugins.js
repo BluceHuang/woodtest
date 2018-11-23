@@ -79,6 +79,20 @@ exports.redis = {
     }
   }
 }
+
+exports.mysqlconnect = {
+  package: 'wood-mysql/connect',
+  enable: true,
+  config: {
+    test: {
+      host: '10.0.1.26',
+      port: '3306',
+      user: 'hy',
+      password: 'HYtest123@'
+    }
+  }
+}
+
 /**
  * mysql
  */

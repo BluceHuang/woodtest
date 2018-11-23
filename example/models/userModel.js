@@ -1,7 +1,7 @@
 // by YuRonghui 2018-10-19
 const {Model, Fields, error} = require('../../index');
 
-module.exports = Model('master.users', new Fields({
+module.exports = Model('test.user', new Fields({
     "uid": {
       type: 'Number',
       required: true,
