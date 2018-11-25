@@ -74,7 +74,7 @@ exports.redis = {
   config: {
     master: {
       port: 6379,
-      host: '10.0.1.26',
+      host: '127.0.0.1',
       dbnum: 10
     }
   }
@@ -86,10 +86,10 @@ exports.mysqlconnect = {
   config: {
     test: {
       database: 'test',
-      host: '10.0.1.26',
+      host: '127.0.0.1',
       port: '3306',
-      user: 'hy',
-      password: 'HYtest123@',
+      user: 'root',
+      password: '',
       pool: {
         max: 5,
         min: 0,
@@ -106,10 +106,11 @@ exports.mysql = {
   package: 'wood-mysql',
   enable: true,
   config: {
-    master: {
-      host: '10.0.1.26',
+    test: {
+      host: '127.0.0.1',
+      port: '3306',
       user: 'root',
-      password: 'A123456a&'
+      password: ''
     }
   }
 }
