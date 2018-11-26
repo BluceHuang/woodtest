@@ -1,11 +1,13 @@
 const {
   Controller,
   Model,
-  error,
   catchErr,
-  Query,
-  Util
+  Util,
+  error
 } = require('../../index');
+
+//const {error, catchErr} = Util;
+
 const controller = Controller();
 
 class PubController extends controller {
@@ -16,7 +18,8 @@ class PubController extends controller {
       res.print('uid不能为空');
       return;
     }
-    const hasOne = await catchErr(Model('pub').findOne({ name: params.data.name }));
+    let Pub = Model('test.pub');
+    const hasOne = await catchErr(Model('test.pub').findOne({ name: params.data.name }));
     if (hasOne.err) {
       res.print(hasOne);
     } else {

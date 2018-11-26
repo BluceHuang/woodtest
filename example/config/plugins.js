@@ -58,7 +58,7 @@ exports.util = {
  *  邮件
  */
 exports.email = {
-  enable: true,
+  enable: false,
   package: 'wood-email',
   /*
   user 		// username for logging into smtp
@@ -73,10 +73,10 @@ exports.email = {
   logger // override the built-in logger (useful for e.g. Azure Fun
   */
   config: {
-    username: 'nx0105',
-    password: 'huicui19',
-    host: 'smtp.163.com',
-    sender: 'nx0105@163.com'
+    username: '',
+    password: '',
+    host: '',
+    sender: ''
  }
 }
 
@@ -98,7 +98,7 @@ exports.query = {
  */
 exports.redis = {
   package: 'wood-redis',
-  enable: false,
+  enable: true,
   config: {
     master: {
       port: 6379,
