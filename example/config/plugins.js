@@ -74,7 +74,7 @@ exports.redis = {
   config: {
     master: {
       port: 6379,
-      host: '127.0.0.1',
+      host: '10.0.1.26',
       dbnum: 10
     }
   }
@@ -86,10 +86,10 @@ exports.mysqlconnect = {
   config: {
     test: {
       database: 'test',
-      host: '127.0.0.1',
+      host: '10.0.1.26',
       port: '3306',
-      user: 'root',
-      password: '',
+      user: 'hy',
+      password: 'HYtest123@',
       pool: {
         max: 5,
         min: 0,
@@ -107,10 +107,10 @@ exports.mysql = {
   enable: true,
   config: {
     test: {
-      host: '127.0.0.1',
+      host: '10.0.1.26',
       port: '3306',
-      user: 'root',
-      password: ''
+      user: 'hy',
+      password: 'HYtest123@'
     }
   }
 }

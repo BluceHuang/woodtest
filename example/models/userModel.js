@@ -1,9 +1,10 @@
 // by YuRonghui 2018-10-19
-const {Model,  error} = require('../../index')
+const {Model, error} = require('../../index')
 
+const { DataTypes, Op, Validator } = WOOD.Plugin('model');
 
 module.exports = Model('test.user', {
-  username: 'String',
-  birthday: 'DATE'
+  username: DataTypes.STRING,
+  birthday: DataTypes.DATE
 });
 
