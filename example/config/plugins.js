@@ -53,6 +53,34 @@ exports.util = {
   package: 'wood-util',
   enable: true
 }
+
+/**
+ *  邮件
+ */
+exports.email = {
+  enable: true,
+  package: 'wood-email',
+  /*
+  user 		// username for logging into smtp
+	password // password for logging into smtp
+	host		// smtp host
+	port		// smtp port (if null a standard port number will be used)
+	ssl		// boolean or object {key, ca, cert} (if true or object, ssl connection will be made)
+	tls		// boolean or object (if true or object, starttls will be initiated)
+	timeout	// max number of milliseconds to wait for smtp responses (defaults to 5000)
+	domain	// domain to greet smtp with (defaults to os.hostname)
+  authentication // array of preferred authentication methods ('PLAIN', 'LOGIN', 'CRAM-MD5', 'XOAUTH2')
+  logger // override the built-in logger (useful for e.g. Azure Fun
+  */
+  config: {
+    username: 'nx0105',
+    password: 'huicui19',
+    host: 'smtp.163.com',
+    sender: 'nx0105@163.com'
+ }
+}
+
+
 /**
  * 查询条件对象
  */
@@ -70,7 +98,7 @@ exports.query = {
  */
 exports.redis = {
   package: 'wood-redis',
-  enable: true,
+  enable: false,
   config: {
     master: {
       port: 6379,

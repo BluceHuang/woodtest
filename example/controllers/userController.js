@@ -11,6 +11,7 @@ const controller = Controller();
 class UserController extends controller {
   // 添加用户
   async add(req, res, next) {
+
     let params = Util.getParams(req);
     if (!params.data.uid) {
       res.print('uid不能为空');
