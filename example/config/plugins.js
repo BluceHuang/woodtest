@@ -86,26 +86,32 @@ exports.email = {
  */
 exports.query = {
   package: 'wood-query',
-  enable: false
+  enable: true
 }
 
 exports.query = {
   package: 'wood-querysql',
-  enable: true
+  enable: false
 }
+
+exports.redisconnect = {
+  package: 'wood-redis/connect',
+  enable: true,
+  config: {
+    test: {
+      port: 6379,
+      host: '127.0.0.1',
+      dbnum: 10
+    }
+  }
+}
+
 /**
  * redis
  */
 exports.redis = {
   package: 'wood-redis',
   enable: true,
-  config: {
-    master: {
-      port: 6379,
-      host: '10.0.1.26',
-      dbnum: 10
-    }
-  }
 }
 
 exports.mysqlconnect = {
@@ -259,6 +265,13 @@ exports.apidocs = {
   config: {}
 }
 /**
+ * 异常捕获
+ */
+exports.onerror = {
+  package: 'wood-onerror',
+  enable: true
+}
+/**
  * http服务
  */
 exports.httpserver = {
@@ -275,3 +288,18 @@ exports.httpserver = {
   }
 }
 
+exports.io = {
+  enable: false,
+  package: 'wood-socket.io',
+  init: {},
+  namespace: {
+    '/': {
+      connectionMiddleware: [],
+      packetMiddleware: [],
+    },
+  },
+  redis: {
+    host: '127.0.0.1',
+    port: 6379
+  }
+};

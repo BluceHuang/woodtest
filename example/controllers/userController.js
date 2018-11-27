@@ -1,6 +1,7 @@
 const {
   Controller,
   Model,
+  Plugin,
   error,
   catchErr,
   Query,
