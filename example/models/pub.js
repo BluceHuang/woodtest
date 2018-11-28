@@ -1,7 +1,7 @@
 // by YuRonghui 2018-10-19
 const { Model, error, DataTypes } = require('../../index')
 
-module.exports = Model('test.pub', {
+let pub = Model('test.pub', {
   name: { type: DataTypes.STRING },
   address: { type: DataTypes.STRING },
   latitude: {
@@ -18,3 +18,5 @@ module.exports = Model('test.pub', {
   },
 });
 
+
+module.exports = pub;

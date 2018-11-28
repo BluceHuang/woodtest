@@ -6,4 +6,7 @@ const {Model, error, email, DataTypes} = require('../../index')
 module.exports = Model('test.user', {
   username: DataTypes.STRING,
   birthday: DataTypes.DATE
+}, 
+{
+  belongsTo: "pub"
 });

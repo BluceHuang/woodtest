@@ -28,7 +28,10 @@ class PubController extends controller {
       if (hasOne.data && !Util.isEmpty(hasOne.data)) {
         data = Object.assign(hasOne.data, params.data);
       }
-      const result = await catchErr(Model('test.pub')[oper](data));
+      //const result = await catchErr(Model('test.pub')[oper](data));
+      //res.print(result);
+
+      const result = await catchErr(Model('test.user').findList());
       res.print(result);
     }
   }
