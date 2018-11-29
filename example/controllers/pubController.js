@@ -3,7 +3,8 @@ const {
   Model,
   catchErr,
   Util,
-  error
+  error,
+  email
 } = require('../../index');
 
 //const {error, catchErr} = Util;

@@ -58,7 +58,7 @@ exports.util = {
  *  邮件
  */
 exports.email = {
-  enable: false,
+  enable: true,
   package: 'wood-email',
   /*
   user 		// username for logging into smtp
@@ -73,10 +73,11 @@ exports.email = {
   logger // override the built-in logger (useful for e.g. Azure Fun
   */
   config: {
-    username: '',
-    password: '',
-    host: '',
-    sender: ''
+    username: 'nx0105',
+    password: 'huicui19',
+    host: 'smtp.163.com',
+    sender: 'nx0105@163.com',
+    ssl: true
  }
 }
 
