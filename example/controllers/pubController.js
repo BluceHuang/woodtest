@@ -4,7 +4,8 @@ const {
   catchErr,
   Util,
   error,
-  email
+  email,
+  Log
 } = require('../../index');
 
 //const {error, catchErr} = Util;
@@ -19,7 +20,6 @@ class PubController extends controller {
       res.print('uid不能为空');
       return;
     }
-    let Pub = Model('test.pub');
     const hasOne = await catchErr(Model('test.pub').findOne({ name: params.data.name }));
     if (hasOne.err) {
       res.print(hasOne);
@@ -29,11 +29,13 @@ class PubController extends controller {
       if (hasOne.data && !Util.isEmpty(hasOne.data)) {
         data = Object.assign(hasOne.data, params.data);
       }
-      //const result = await catchErr(Model('test.pub')[oper](data));
-      //res.print(result);
-
-      const result = await catchErr(Model('test.user').findList());
+      const result = await catchErr(Model('test.pub')[oper](data));
       res.print(result);
+
+      Log.debug("a debug hapeend");
+
+      // const result = await catchErr(Model('test.user').findList());
+      // res.print(result);
     }
   }
 }

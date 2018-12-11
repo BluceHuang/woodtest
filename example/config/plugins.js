@@ -139,15 +139,7 @@ exports.mysqlconnect = {
  */
 exports.mysql = {
   package: 'wood-mysql',
-  enable: true,
-  config: {
-    test: {
-      host: '10.0.1.26',
-      port: '3306',
-      user: 'hy',
-      password: 'HYtest123@'
-    }
-  }
+  enable: true
 }
 /**
  * mongo
@@ -216,7 +208,7 @@ exports.token = {
  */
 exports.fields = {
   package: 'wood-fields',
-  enable: true
+  enable: false
 }
 /**
  * 数据模型
@@ -304,3 +296,11 @@ exports.io = {
     port: 6379
   }
 };
+
+exports.schedule = {
+  enable: true,
+  package: 'wood-schedule',
+  config: {
+      dirs: 'schedules'
+  }
+}
